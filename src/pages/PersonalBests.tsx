@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useWorkout } from '../context/WorkoutContext';
 import { format } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
 import './PersonalBests.css';
 
 const PersonalBests = () => {

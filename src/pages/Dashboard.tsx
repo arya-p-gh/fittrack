@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { workouts, nutritionLogs, personalBests } = useWorkout();
+  const { workouts, personalBests } = useWorkout();
 
   const recentWorkouts = workouts
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
