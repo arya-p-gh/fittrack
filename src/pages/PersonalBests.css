@@ -1,8 +1,7 @@
 .personal-bests-page {
-  width: 100%;
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
 .page-title {
@@ -14,16 +13,16 @@
 
 .personal-bests-container {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
+  margin-top: 2rem;
 }
 
 .personal-bests-form-container {
-  background: white;
-  border-radius: 8px;
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  height: fit-content;
 }
 
 .section-title {
@@ -34,35 +33,33 @@
 }
 
 .personal-bests-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  gap: 1rem;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 0.5rem;
 }
 
 .form-group label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #4a5568;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .form-input {
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s ease;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  border-color: var(--accent-color);
 }
 
 .button {
@@ -84,40 +81,47 @@
 }
 
 .personal-bests-list-container {
-  background: white;
-  border-radius: 8px;
+  background: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
 }
 
 .table-container {
   overflow-x: auto;
+  margin-top: 1rem;
 }
 
 .personal-bests-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 1rem;
 }
 
 .personal-bests-table th,
 .personal-bests-table td {
-  padding: 1rem;
+  padding: 0.75rem;
   text-align: left;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .personal-bests-table th {
-  font-weight: 600;
-  color: #4a5568;
-  background-color: #f7fafc;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.personal-bests-table tr:last-child td {
+  border-bottom: none;
 }
 
 .empty-state {
   text-align: center;
-  color: #718096;
+  color: var(--text-secondary);
   padding: 2rem;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
   .personal-bests-page {
     padding: 1rem;
@@ -125,10 +129,49 @@
 
   .personal-bests-container {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .personal-bests-form-container,
   .personal-bests-list-container {
-    padding: 1.5rem;
+    padding: 1rem;
+  }
+
+  .form-input {
+    padding: 0.5rem;
+  }
+
+  .personal-bests-table th,
+  .personal-bests-table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .personal-bests-page {
+    padding: 0.5rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.8rem;
+  }
+
+  .form-input {
+    font-size: 0.9rem;
+  }
+
+  .personal-bests-table th,
+  .personal-bests-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
   }
 } 
