@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { useWorkout } from '../context/WorkoutContext';
+import { usePersonalBest } from '../../application/personalBest/PersonalBestContext';
 import { format } from 'date-fns';
 import './PersonalBests.css';
 
 const PersonalBests = () => {
-  const { personalBests, updatePersonalBest } = useWorkout();
+  const { updatePersonalBest, getRankedPersonalBests } = usePersonalBest();
   const [exerciseName, setExerciseName] = useState('');
   const [weight, setWeight] = useState('');
+  const rankedPersonalBests = getRankedPersonalBests();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +66,7 @@ const PersonalBests = () => {
 
         <div className="personal-bests-list-container">
           <h2 className="section-title">Your Personal Bests</h2>
-          {personalBests.length > 0 ? (
+          {rankedPersonalBests.length > 0 ? (
             <div className="table-container">
               <table className="personal-bests-table">
                 <thead>
@@ -76,9 +77,7 @@ const PersonalBests = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {personalBests
-                    .sort((a, b) => b.weight - a.weight)
-                    .map((pb) => (
+                  {rankedPersonalBests.map((pb) => (
                       <tr key={`${pb.exerciseName}-${pb.date}`}>
                         <td>{pb.exerciseName}</td>
                         <td>{pb.weight}</td>
