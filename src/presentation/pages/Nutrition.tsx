@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { useWorkout } from '../context/WorkoutContext';
+import { useNutrition } from '../../application/nutrition/NutritionContext';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import './Nutrition.css';
 
 const Nutrition = () => {
-  const { nutritionLogs, addNutritionLog } = useWorkout();
+  const { addNutritionLog, computeMetrics, getSortedNutritionLogs } = useNutrition();
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fats, setFats] = useState('');
+  const nutritionMetrics = computeMetrics();
+  const sortedNutritionLogs = getSortedNutritionLogs();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,15 +31,6 @@ const Nutrition = () => {
     setProtein('');
     setCarbs('');
     setFats('');
-  };
-
-  const calculateTotalCalories = () => {
-    return nutritionLogs.reduce((total, log) => total + log.calories, 0);
-  };
-
-  const calculateAverageCalories = () => {
-    if (nutritionLogs.length === 0) return 0;
-    return Math.round(calculateTotalCalories() / nutritionLogs.length);
   };
 
   return (
@@ -115,24 +108,24 @@ const Nutrition = () => {
             <div className="stat-card">
               <div className="stat-icon">📊</div>
               <div className="stat-label">Total Calories</div>
-              <div className="stat-number">{calculateTotalCalories()}</div>
+              <div className="stat-number">{nutritionMetrics.totalCalories}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon">📈</div>
               <div className="stat-label">Average Daily Calories</div>
-              <div className="stat-number">{calculateAverageCalories()}</div>
+              <div className="stat-number">{nutritionMetrics.averageCalories}</div>
             </div>
             <div className="stat-card">
               <div className="stat-icon">📅</div>
               <div className="stat-label">Days Tracked</div>
-              <div className="stat-number">{nutritionLogs.length}</div>
+              <div className="stat-number">{nutritionMetrics.daysTracked}</div>
             </div>
           </div>
         </div>
 
         <div className="nutrition-history-container">
           <h2 className="section-title">Nutrition History</h2>
-          {nutritionLogs.length > 0 ? (
+          {sortedNutritionLogs.length > 0 ? (
             <div className="table-container">
               <table className="nutrition-table">
                 <thead>
@@ -145,9 +138,7 @@ const Nutrition = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {nutritionLogs
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map((log) => (
+                  {sortedNutritionLogs.map((log) => (
                       <tr key={log.id}>
                         <td>{format(new Date(log.date), 'MMM d, yyyy')}</td>
                         <td>{log.calories}</td>

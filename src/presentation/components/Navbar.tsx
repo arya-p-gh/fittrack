@@ -1,5 +1,5 @@
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../providers/ThemeContext';
 import './Navbar.css';
 
 const Navbar = () => {

@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { ChatStrategy } from '../../application/chat/ChatStrategy';
+import { createChatStrategy } from '../../application/chat/createChatStrategy';
+import { AppLogger } from '../../application/common/AppLogger';
+import { sanitizeChatInput } from '../../application/chat/chatUtils';
 import './ChatWindow.css';
 
 interface Message {
@@ -6,8 +10,7 @@ interface Message {
   content: string;
 }
 
-const GEMINI_API_KEY = 'AIzaSyCF3DqRaqNK3dnc_jWwE6WRQS7fWI0ftms';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+const chatStrategy: ChatStrategy = createChatStrategy();
 
 export const ChatWindow = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,32 +29,24 @@ export const ChatWindow = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const userMessage = sanitizeChatInput(input);
+    if (!userMessage) return;
 
-    const userMessage = input.trim();
     setInput('');
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: userMessage }]
-          }]
-        })
-      });
-
-      const data = await response.json();
-      const aiResponse = data.candidates[0].content.parts[0].text;
+      const aiResponse = await chatStrategy.sendMessage(userMessage);
       
       setMessages(prev => [...prev, { role: 'assistant', content: aiResponse }]);
     } catch (error) {
-      console.error('Error:', error);
+      AppLogger.error({
+        scope: 'ChatWindow',
+        action: 'sendMessage',
+        message: 'Failed to send chat message.',
+        details: error,
+      });
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: 'Sorry, I encountered an error. Please try again.' 

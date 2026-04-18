@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useWorkout } from '../context/WorkoutContext';
+import { useWorkout } from '../../application/workout/WorkoutContext';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
-import { exerciseCategories } from '../data/exercises';
-import { Exercise } from '../types';
+import { exerciseCategories } from '../../domain/reference/exercises';
+import { Exercise } from '../../domain/entities';
 import './WorkoutLog.css';
 
 interface ExerciseFormData {
@@ -14,12 +14,13 @@ interface ExerciseFormData {
 }
 
 const WorkoutLog = () => {
-  const { workouts, addWorkout } = useWorkout();
+  const { workouts, addWorkout, getSortedWorkouts } = useWorkout();
   const [exercises, setExercises] = useState<ExerciseFormData[]>([
     { name: '', sets: 3, reps: 10, weight: 0 },
   ]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const sortedWorkouts = getSortedWorkouts();
 
   const handleAddExercise = () => {
     setExercises([...exercises, { name: '', sets: 3, reps: 10, weight: 0 }]);
@@ -207,9 +208,7 @@ const WorkoutLog = () => {
                 </tr>
               </thead>
               <tbody>
-                {workouts
-                  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                  .map((workout) => (
+                {sortedWorkouts.map((workout) => (
                     <tr key={workout.id}>
                       <td>{format(new Date(workout.date), 'MMM d, yyyy')}</td>
                       <td>

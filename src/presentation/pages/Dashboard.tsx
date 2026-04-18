@@ -1,27 +1,23 @@
-import { useWorkout } from '../context/WorkoutContext';
+import { useWorkout } from '../../application/workout/WorkoutContext';
+import { usePersonalBest } from '../../application/personalBest/PersonalBestContext';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { workouts, personalBests } = useWorkout();
+  const { getRecentWorkouts, computeMetrics: computeWorkoutMetrics } = useWorkout();
+  const { computeMetrics: computePersonalBestMetrics } = usePersonalBest();
 
-  const recentWorkouts = workouts
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
+  const recentWorkouts = getRecentWorkouts(5);
 
-  const totalWorkouts = workouts.length;
-  const totalExercises = workouts.reduce(
-    (acc, workout) => acc + workout.exercises.length,
-    0
-  );
-  const totalPersonalBests = personalBests.length;
+  const workoutMetrics = computeWorkoutMetrics();
+  const personalBestMetrics = computePersonalBestMetrics();
 
   return (
     <div className="dashboard">
       <div className="dashboard-header">
         <h1 className="page-title">Dashboard</h1>
-        <Link to="/workouts" className="button button-primary">
+        <Link to="/workout" className="button button-primary">
           Log Workout
         </Link>
       </div>
@@ -30,17 +26,17 @@ const Dashboard = () => {
         <div className="stat-card">
           <div className="stat-icon">💪</div>
           <div className="stat-label">Total Workouts</div>
-          <div className="stat-number">{totalWorkouts}</div>
+          <div className="stat-number">{workoutMetrics.totalWorkouts}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">🏋️</div>
           <div className="stat-label">Total Exercises</div>
-          <div className="stat-number">{totalExercises}</div>
+          <div className="stat-number">{workoutMetrics.totalExercises}</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon">🏆</div>
           <div className="stat-label">Personal Bests</div>
-          <div className="stat-number">{totalPersonalBests}</div>
+          <div className="stat-number">{personalBestMetrics.totalPersonalBests}</div>
         </div>
       </div>
 
