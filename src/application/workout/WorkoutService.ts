@@ -13,7 +13,11 @@ export class WorkoutService {
     return [...workouts, workout];
   }
 
-  addExercise(workouts: Workout[], workoutId: string, exercise: Exercise): Workout[] {
+  addExercise(
+    workouts: Workout[],
+    workoutId: string,
+    exercise: Exercise
+  ): Workout[] {
     this.ensureWorkoutCollection(workouts);
     this.ensureValidExercise(exercise);
 
@@ -21,8 +25,8 @@ export class WorkoutService {
       throw new Error('[WorkoutService] workoutId is required.');
     }
 
-    const exists = workouts.some((workout) => workout.id === workoutId);
-    if (!exists) {
+    const workoutExists = workouts.some((workout) => workout.id === workoutId);
+    if (!workoutExists) {
       throw new Error(`[WorkoutService] Workout with id ${workoutId} was not found.`);
     }
 
@@ -68,7 +72,10 @@ export class WorkoutService {
     this.ensureWorkoutCollection(workouts);
     return {
       totalWorkouts: workouts.length,
-      totalExercises: workouts.reduce((total, workout) => total + workout.exercises.length, 0),
+      totalExercises: workouts.reduce(
+        (total, workout) => total + workout.exercises.length,
+        0
+      ),
     };
   }
 
