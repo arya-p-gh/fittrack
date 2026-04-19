@@ -8,11 +8,11 @@ export class LocalStoragePersonalBestRepository implements PersonalBestRepositor
 
   constructor(private readonly storageKey = 'personalBests') {}
 
-  getAll(): PersonalBest[] {
-    return readArrayFromStorage<PersonalBest>(this.storageKey, this.scope);
+  async getAll(): Promise<PersonalBest[]> {
+    return Promise.resolve(readArrayFromStorage<PersonalBest>(this.storageKey, this.scope));
   }
 
-  saveAll(personalBests: PersonalBest[]): void {
+  async saveAll(personalBests: PersonalBest[]): Promise<void> {
     if (!Array.isArray(personalBests)) {
       const errorMessage = '[LocalStoragePersonalBestRepository] saveAll expects an array.';
       AppLogger.error({
@@ -24,5 +24,6 @@ export class LocalStoragePersonalBestRepository implements PersonalBestRepositor
     }
 
     writeArrayToStorage(this.storageKey, personalBests, this.scope);
+    return Promise.resolve();
   }
 }

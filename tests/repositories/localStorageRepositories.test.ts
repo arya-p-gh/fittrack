@@ -40,18 +40,18 @@ describe('LocalStorage repositories', () => {
     });
   });
 
-  it('workout repository saves and loads using mocked storage', () => {
+  it('workout repository saves and loads using mocked storage', async () => {
     const repository = new LocalStorageWorkoutRepository('workouts');
     const workouts = [buildWorkout()];
 
-    repository.saveAll(workouts);
-    const loaded = repository.getAll();
+    await repository.saveAll(workouts);
+    const loaded = await repository.getAll();
 
     expect(loaded).toHaveLength(1);
     expect(loaded[0].id).toBe('workout-1');
   });
 
-  it('nutrition repository returns [] for invalid JSON payload', () => {
+  it('nutrition repository returns [] for invalid JSON payload', async () => {
     const mockStorage = createMockStorage({ nutritionLogs: '{invalid-json' });
     Object.defineProperty(globalThis, 'localStorage', {
       value: mockStorage,
@@ -60,10 +60,10 @@ describe('LocalStorage repositories', () => {
     });
 
     const repository = new LocalStorageNutritionRepository('nutritionLogs');
-    expect(repository.getAll()).toEqual([]);
+    expect(await repository.getAll()).toEqual([]);
   });
 
-  it('personal best repository throws when storage write fails', () => {
+  it('personal best repository throws when storage write fails', async () => {
     const mockStorage = createMockStorage();
     mockStorage.setItem.mockImplementation(() => {
       throw new Error('storage quota exceeded');
@@ -77,16 +77,16 @@ describe('LocalStorage repositories', () => {
 
     const repository = new LocalStoragePersonalBestRepository('personalBests');
 
-    expect(() => repository.saveAll([buildPersonalBest()])).toThrow(
+    await expect(repository.saveAll([buildPersonalBest()])).rejects.toThrow(
       '[LocalStoragePersonalBestRepository] Failed to persist personalBests.'
     );
   });
 
-  it('nutrition repository round-trips mocked storage data', () => {
+  it('nutrition repository round-trips mocked storage data', async () => {
     const repository = new LocalStorageNutritionRepository('nutritionLogs');
-    repository.saveAll([buildNutritionLog()]);
+    await repository.saveAll([buildNutritionLog()]);
 
-    const loaded = repository.getAll();
+    const loaded = await repository.getAll();
     expect(loaded[0].id).toBe('nutrition-1');
   });
 });

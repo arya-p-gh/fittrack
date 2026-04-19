@@ -2,14 +2,14 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { PersonalBest } from '../../domain/entities';
 import { PersonalBestMetrics, PersonalBestService } from './PersonalBestService';
 import { PersonalBestRepository } from '../interfaces/PersonalBestRepository';
-import { LocalStoragePersonalBestRepository } from '../../infrastructure/repositories/LocalStoragePersonalBestRepository';
+import { ApiPersonalBestRepository } from '../../infrastructure/repositories/ApiPersonalBestRepository';
 import { AppLogger } from '../common/AppLogger';
 
 interface PersonalBestContextType {
   personalBests: PersonalBest[];
-  addPersonalBest: (personalBest: PersonalBest) => void;
-  updatePersonalBest: (personalBest: PersonalBest) => void;
-  deletePersonalBest: (exerciseName: string) => void;
+  addPersonalBest: (personalBest: PersonalBest) => Promise<void>;
+  updatePersonalBest: (personalBest: PersonalBest) => Promise<void>;
+  deletePersonalBest: (exerciseName: string) => Promise<void>;
   computeMetrics: () => PersonalBestMetrics;
   getRankedPersonalBests: () => PersonalBest[];
 }
@@ -22,7 +22,7 @@ interface PersonalBestProviderProps {
 const PersonalBestContext = createContext<PersonalBestContextType | undefined>(undefined);
 const personalBestService = new PersonalBestService();
 const defaultPersonalBestRepository: PersonalBestRepository =
-  new LocalStoragePersonalBestRepository();
+  new ApiPersonalBestRepository();
 const logScope = 'PersonalBestContext';
 
 export const PersonalBestProvider = ({
@@ -32,27 +32,30 @@ export const PersonalBestProvider = ({
   const [personalBests, setPersonalBests] = useState<PersonalBest[]>([]);
 
   useEffect(() => {
-    try {
-      setPersonalBests(repository.getAll());
-    } catch (error) {
-      AppLogger.error({
-        scope: logScope,
-        action: 'load',
-        message: 'Failed to load personal bests from repository. Falling back to empty state.',
-        details: error,
-      });
-      setPersonalBests([]);
-    }
+    const load = async () => {
+      try {
+        setPersonalBests(await repository.getAll());
+      } catch (error) {
+        AppLogger.error({
+          scope: logScope,
+          action: 'load',
+          message: 'Failed to load personal bests from repository. Falling back to empty state.',
+          details: error,
+        });
+        setPersonalBests([]);
+      }
+    };
+    load();
   }, [repository]);
 
-  const persist = (nextPersonalBests: PersonalBest[]) => {
-    repository.saveAll(nextPersonalBests);
+  const persist = async (nextPersonalBests: PersonalBest[]) => {
+    await repository.saveAll(nextPersonalBests);
     setPersonalBests(nextPersonalBests);
   };
 
-  const addPersonalBest = (personalBest: PersonalBest) => {
+  const addPersonalBest = async (personalBest: PersonalBest) => {
     try {
-      persist(personalBestService.addPersonalBest(personalBests, personalBest));
+      await persist(personalBestService.addPersonalBest(personalBests, personalBest));
       AppLogger.info({
         scope: logScope,
         action: 'addPersonalBest',
@@ -68,9 +71,9 @@ export const PersonalBestProvider = ({
     }
   };
 
-  const updatePersonalBest = (personalBest: PersonalBest) => {
+  const updatePersonalBest = async (personalBest: PersonalBest) => {
     try {
-      persist(personalBestService.updatePersonalBest(personalBests, personalBest));
+      await persist(personalBestService.updatePersonalBest(personalBests, personalBest));
       AppLogger.info({
         scope: logScope,
         action: 'updatePersonalBest',
@@ -86,9 +89,9 @@ export const PersonalBestProvider = ({
     }
   };
 
-  const deletePersonalBest = (exerciseName: string) => {
+  const deletePersonalBest = async (exerciseName: string) => {
     try {
-      persist(personalBestService.deletePersonalBest(personalBests, exerciseName));
+      await persist(personalBestService.deletePersonalBest(personalBests, exerciseName));
       AppLogger.info({
         scope: logScope,
         action: 'deletePersonalBest',

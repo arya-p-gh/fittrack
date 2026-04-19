@@ -8,11 +8,11 @@ export class LocalStorageWorkoutRepository implements WorkoutRepository {
 
   constructor(private readonly storageKey = 'workouts') {}
 
-  getAll(): Workout[] {
-    return readArrayFromStorage<Workout>(this.storageKey, this.scope);
+  async getAll(): Promise<Workout[]> {
+    return Promise.resolve(readArrayFromStorage<Workout>(this.storageKey, this.scope));
   }
 
-  saveAll(workouts: Workout[]): void {
+  async saveAll(workouts: Workout[]): Promise<void> {
     if (!Array.isArray(workouts)) {
       const errorMessage = '[LocalStorageWorkoutRepository] saveAll expects an array.';
       AppLogger.error({
@@ -24,5 +24,6 @@ export class LocalStorageWorkoutRepository implements WorkoutRepository {
     }
 
     writeArrayToStorage(this.storageKey, workouts, this.scope);
+    return Promise.resolve();
   }
 }

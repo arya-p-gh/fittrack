@@ -2,15 +2,15 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { Exercise, Workout } from '../../domain/entities';
 import { WorkoutMetrics, WorkoutService } from './WorkoutService';
 import { WorkoutRepository } from '../interfaces/WorkoutRepository';
-import { LocalStorageWorkoutRepository } from '../../infrastructure/repositories/LocalStorageWorkoutRepository';
+import { ApiWorkoutRepository } from '../../infrastructure/repositories/ApiWorkoutRepository';
 import { AppLogger } from '../common/AppLogger';
 
 interface WorkoutContextType {
   workouts: Workout[];
-  addWorkout: (workout: Workout) => void;
-  addExercise: (workoutId: string, exercise: Exercise) => void;
-  updateWorkout: (workout: Workout) => void;
-  deleteWorkout: (workoutId: string) => void;
+  addWorkout: (workout: Workout) => Promise<void>;
+  addExercise: (workoutId: string, exercise: Exercise) => Promise<void>;
+  updateWorkout: (workout: Workout) => Promise<void>;
+  deleteWorkout: (workoutId: string) => Promise<void>;
   computeMetrics: () => WorkoutMetrics;
   getRecentWorkouts: (limit?: number) => Workout[];
   getSortedWorkouts: () => Workout[];
@@ -23,7 +23,7 @@ interface WorkoutProviderProps {
 
 const WorkoutContext = createContext<WorkoutContextType | undefined>(undefined);
 const workoutService = new WorkoutService();
-const defaultWorkoutRepository: WorkoutRepository = new LocalStorageWorkoutRepository();
+const defaultWorkoutRepository: WorkoutRepository = new ApiWorkoutRepository();
 const logScope = 'WorkoutContext';
 
 export const WorkoutProvider = ({
@@ -33,27 +33,30 @@ export const WorkoutProvider = ({
   const [workouts, setWorkouts] = useState<Workout[]>([]);
 
   useEffect(() => {
-    try {
-      setWorkouts(repository.getAll());
-    } catch (error) {
-      AppLogger.error({
-        scope: logScope,
-        action: 'load',
-        message: 'Failed to load workouts from repository. Falling back to empty state.',
-        details: error,
-      });
-      setWorkouts([]);
-    }
+    const load = async () => {
+      try {
+        setWorkouts(await repository.getAll());
+      } catch (error) {
+        AppLogger.error({
+          scope: logScope,
+          action: 'load',
+          message: 'Failed to load workouts from repository. Falling back to empty state.',
+          details: error,
+        });
+        setWorkouts([]);
+      }
+    };
+    load();
   }, [repository]);
 
-  const persist = (nextWorkouts: Workout[]) => {
-    repository.saveAll(nextWorkouts);
+  const persist = async (nextWorkouts: Workout[]) => {
+    await repository.saveAll(nextWorkouts);
     setWorkouts(nextWorkouts);
   };
 
-  const addWorkout = (workout: Workout) => {
+  const addWorkout = async (workout: Workout) => {
     try {
-      persist(workoutService.addWorkout(workouts, workout));
+      await persist(workoutService.addWorkout(workouts, workout));
       AppLogger.info({
         scope: logScope,
         action: 'addWorkout',
@@ -69,9 +72,9 @@ export const WorkoutProvider = ({
     }
   };
 
-  const addExercise = (workoutId: string, exercise: Exercise) => {
+  const addExercise = async (workoutId: string, exercise: Exercise) => {
     try {
-      persist(workoutService.addExercise(workouts, workoutId, exercise));
+      await persist(workoutService.addExercise(workouts, workoutId, exercise));
       AppLogger.info({
         scope: logScope,
         action: 'addExercise',
@@ -87,9 +90,9 @@ export const WorkoutProvider = ({
     }
   };
 
-  const updateWorkout = (updatedWorkout: Workout) => {
+  const updateWorkout = async (updatedWorkout: Workout) => {
     try {
-      persist(workoutService.updateWorkout(workouts, updatedWorkout));
+      await persist(workoutService.updateWorkout(workouts, updatedWorkout));
       AppLogger.info({
         scope: logScope,
         action: 'updateWorkout',
@@ -105,9 +108,9 @@ export const WorkoutProvider = ({
     }
   };
 
-  const deleteWorkout = (workoutId: string) => {
+  const deleteWorkout = async (workoutId: string) => {
     try {
-      persist(workoutService.deleteWorkout(workouts, workoutId));
+      await persist(workoutService.deleteWorkout(workouts, workoutId));
       AppLogger.info({
         scope: logScope,
         action: 'deleteWorkout',

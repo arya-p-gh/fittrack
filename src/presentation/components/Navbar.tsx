@@ -1,10 +1,12 @@
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { useTheme } from '../providers/ThemeContext';
+import { useAuth } from '../../application/auth/AuthContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { logout } = useAuth();
   
   const isActive = (path: string) => location.pathname === path;
   
@@ -46,6 +48,13 @@ const Navbar = () => {
               aria-label="Toggle theme"
             >
               {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <button 
+              onClick={logout} 
+              className="navbar-link" 
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+            >
+              Logout
             </button>
           </div>
         </div>

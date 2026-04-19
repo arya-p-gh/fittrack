@@ -2,14 +2,14 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { NutritionLog } from '../../domain/entities';
 import { NutritionMetrics, NutritionService } from './NutritionService';
 import { NutritionRepository } from '../interfaces/NutritionRepository';
-import { LocalStorageNutritionRepository } from '../../infrastructure/repositories/LocalStorageNutritionRepository';
+import { ApiNutritionRepository } from '../../infrastructure/repositories/ApiNutritionRepository';
 import { AppLogger } from '../common/AppLogger';
 
 interface NutritionContextType {
   nutritionLogs: NutritionLog[];
-  addNutritionLog: (log: NutritionLog) => void;
-  updateNutritionLog: (log: NutritionLog) => void;
-  deleteNutritionLog: (logId: string) => void;
+  addNutritionLog: (log: NutritionLog) => Promise<void>;
+  updateNutritionLog: (log: NutritionLog) => Promise<void>;
+  deleteNutritionLog: (logId: string) => Promise<void>;
   computeMetrics: () => NutritionMetrics;
   getSortedNutritionLogs: () => NutritionLog[];
 }
@@ -21,7 +21,7 @@ interface NutritionProviderProps {
 
 const NutritionContext = createContext<NutritionContextType | undefined>(undefined);
 const nutritionService = new NutritionService();
-const defaultNutritionRepository: NutritionRepository = new LocalStorageNutritionRepository();
+const defaultNutritionRepository: NutritionRepository = new ApiNutritionRepository();
 const logScope = 'NutritionContext';
 
 export const NutritionProvider = ({
@@ -31,27 +31,30 @@ export const NutritionProvider = ({
   const [nutritionLogs, setNutritionLogs] = useState<NutritionLog[]>([]);
 
   useEffect(() => {
-    try {
-      setNutritionLogs(repository.getAll());
-    } catch (error) {
-      AppLogger.error({
-        scope: logScope,
-        action: 'load',
-        message: 'Failed to load nutrition logs from repository. Falling back to empty state.',
-        details: error,
-      });
-      setNutritionLogs([]);
-    }
+    const load = async () => {
+      try {
+        setNutritionLogs(await repository.getAll());
+      } catch (error) {
+        AppLogger.error({
+          scope: logScope,
+          action: 'load',
+          message: 'Failed to load nutrition logs from repository. Falling back to empty state.',
+          details: error,
+        });
+        setNutritionLogs([]);
+      }
+    };
+    load();
   }, [repository]);
 
-  const persist = (nextLogs: NutritionLog[]) => {
-    repository.saveAll(nextLogs);
+  const persist = async (nextLogs: NutritionLog[]) => {
+    await repository.saveAll(nextLogs);
     setNutritionLogs(nextLogs);
   };
 
-  const addNutritionLog = (log: NutritionLog) => {
+  const addNutritionLog = async (log: NutritionLog) => {
     try {
-      persist(nutritionService.addNutritionLog(nutritionLogs, log));
+      await persist(nutritionService.addNutritionLog(nutritionLogs, log));
       AppLogger.info({
         scope: logScope,
         action: 'addNutritionLog',
@@ -67,9 +70,9 @@ export const NutritionProvider = ({
     }
   };
 
-  const updateNutritionLog = (updatedLog: NutritionLog) => {
+  const updateNutritionLog = async (updatedLog: NutritionLog) => {
     try {
-      persist(nutritionService.updateNutritionLog(nutritionLogs, updatedLog));
+      await persist(nutritionService.updateNutritionLog(nutritionLogs, updatedLog));
       AppLogger.info({
         scope: logScope,
         action: 'updateNutritionLog',
@@ -85,9 +88,9 @@ export const NutritionProvider = ({
     }
   };
 
-  const deleteNutritionLog = (logId: string) => {
+  const deleteNutritionLog = async (logId: string) => {
     try {
-      persist(nutritionService.deleteNutritionLog(nutritionLogs, logId));
+      await persist(nutritionService.deleteNutritionLog(nutritionLogs, logId));
       AppLogger.info({
         scope: logScope,
         action: 'deleteNutritionLog',
