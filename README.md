@@ -17,6 +17,13 @@ FitTrack is a full-stack health and fitness tracking platform. Going beyond rudi
 * **Database:** PostgreSQL (Connection polling via `pg`, secure credential injestion)
 * **Testing:** Vitest, Testing Library (Complete unit and Integration test suite mapped to core logic)
 
+## 🧰 Quickstart (Local Dev)
+- **Install**: `npm install`
+- **Run frontend + backend**: `npm run dev:all`
+- **Run tests**: `npm test`
+
+For environment variables and detailed setup, see `docs/development.md`.
+
 ## 📂 4. Folder Structure & Real Code Mapping
 Our architecture rejects the standard front-end monolith. Code boundaries are strictly enforced.
 
