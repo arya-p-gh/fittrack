@@ -1,6 +1,6 @@
 import { Workout } from '../../domain/entities';
 
 export interface WorkoutRepository {
-  getAll(): Workout[];
-  saveAll(workouts: Workout[]): void;
+  getAll(): Promise<Workout[]>;
+  saveAll(workouts: Workout[]): Promise<void>;
 }

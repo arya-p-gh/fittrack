@@ -1,6 +1,6 @@
 import { PersonalBest } from '../../domain/entities';
 
 export interface PersonalBestRepository {
-  getAll(): PersonalBest[];
-  saveAll(personalBests: PersonalBest[]): void;
+  getAll(): Promise<PersonalBest[]>;
+  saveAll(personalBests: PersonalBest[]): Promise<void>;
 }

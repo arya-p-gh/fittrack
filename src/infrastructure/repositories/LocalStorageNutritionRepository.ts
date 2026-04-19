@@ -8,11 +8,11 @@ export class LocalStorageNutritionRepository implements NutritionRepository {
 
   constructor(private readonly storageKey = 'nutritionLogs') {}
 
-  getAll(): NutritionLog[] {
-    return readArrayFromStorage<NutritionLog>(this.storageKey, this.scope);
+  async getAll(): Promise<NutritionLog[]> {
+    return Promise.resolve(readArrayFromStorage<NutritionLog>(this.storageKey, this.scope));
   }
 
-  saveAll(nutritionLogs: NutritionLog[]): void {
+  async saveAll(nutritionLogs: NutritionLog[]): Promise<void> {
     if (!Array.isArray(nutritionLogs)) {
       const errorMessage = '[LocalStorageNutritionRepository] saveAll expects an array.';
       AppLogger.error({
@@ -24,5 +24,6 @@ export class LocalStorageNutritionRepository implements NutritionRepository {
     }
 
     writeArrayToStorage(this.storageKey, nutritionLogs, this.scope);
+    return Promise.resolve();
   }
 }
