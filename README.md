@@ -1,6 +1,5 @@
 # 🏋️ FitTrack: Comprehensive Health & Fitness Management System
 
-> **Top-Tier System Design Course Project** - *A production-grade demonstration of Architecture, OOP, and Development Lifecycle backed by a concrete implementation.*
 
 ## 📌 1. Project Overview
 FitTrack is a full-stack health and fitness tracking platform. Going beyond rudimentary applications, this project was architected from the ground up to reflect industry standards in **System Design, Object-Oriented Programming (OOP) paradigms, and Database Engineering**. By enforcing a strict decoupled architecture (Domain-Driven Design), incorporating structural AI workflows, and integrating a full PostgreSQL backend, FitTrack stands as a comprehensive, scale-ready solution.
