@@ -14,15 +14,46 @@ FitTrack is a full-stack health and fitness tracking platform. Going beyond rudi
 ## 💻 3. Tech Stack
 * **Frontend:** React, TypeScript, Vite (Layered with Presentation / Application / Infrastructure domains)
 * **Backend:** Node.js, Express (RESTful APIs with JWT Auth Middleware)
-* **Database:** PostgreSQL (Connection polling via `pg`, secure credential injestion)
+* **Database:** PostgreSQL (Connection pooling via `pg`, secure credential ingestion)
 * **Testing:** Vitest, Testing Library (Complete unit and Integration test suite mapped to core logic)
 
 ## 🧰 Quickstart (Local Dev)
-- **Install**: `npm install`
-- **Run frontend + backend**: `npm run dev:all`
-- **Run tests**: `npm test`
+
+### ✅ Prerequisites
+- **Node.js**: recommended **Node 18+**
+- **PostgreSQL**: running locally or accessible remotely
+
+### 📦 Install
+```bash
+npm install
+```
+
+### 🔐 Environment Variables
+FitTrack expects environment variables for the frontend and backend.
+
+- **Backend**: create `backend/.env` (or set env vars in your shell)
+  - `DATABASE_URL` (recommended) **or** `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`
+  - `JWT_SECRET`
+- **Frontend (Vite)**: create `.env` at repo root
+  - `VITE_API_BASE_URL` (example: `http://localhost:3001`)
+  - `VITE_CHAT_STRATEGY` (example: `gemini` or `mock`)
+
+### ▶️ Run
+```bash
+npm run dev:all
+```
+
+### 🧪 Test
+```bash
+npm test
+```
 
 For environment variables and detailed setup, see `docs/development.md`.
+
+## 🔧 Common Scripts
+- **`npm run dev:all`**: start frontend + backend together
+- **`npm run dev`**: start frontend (Vite)
+- **`npm run test`**: run unit/integration tests (Vitest)
 
 ## 📂 4. Folder Structure & Real Code Mapping
 Our architecture rejects the standard front-end monolith. Code boundaries are strictly enforced.
@@ -93,6 +124,11 @@ No system is perfect without iteration. We prioritize transparency in architectu
 * **Future Solution:** As the user base grows, this poses a locking mechanism and IOPS threat to PostgreSQL. We would natively migrate to differential updates (patch diffs tracking delta changes locally before syncing).
 
 ---
+
+## 🧯 Troubleshooting
+- **DB connection fails**: verify `DATABASE_URL` (or `PG*` vars) and that Postgres is reachable from the backend process.
+- **401/Unauthorized**: ensure `JWT_SECRET` is set consistently for the backend and that you’re logged in / sending the token.
+- **AI chat not responding**: set `VITE_CHAT_STRATEGY=mock` to validate the UI flow without external dependencies.
 
 ## 🤝 11. Team & Contributors
 Developed explicitly for robust Systems Design Evaluation:
