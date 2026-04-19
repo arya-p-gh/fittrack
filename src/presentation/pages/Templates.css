@@ -1,0 +1,49 @@
+.templates-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.template-card {
+  background-color: var(--surface);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+.template-card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--primary-color);
+}
+
+.template-exercises {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.template-exercises li {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.template-exercises li:last-child {
+  border-bottom: none;
+}
+
+.template-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

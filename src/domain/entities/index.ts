@@ -1,4 +1,10 @@
+export interface User {
+  id: string;
+  email: string;
+}
+
 export interface Exercise {
+
   id: string;
   name: string;
   sets: number;
@@ -26,4 +32,25 @@ export interface PersonalBest {
   exerciseName: string;
   weight: number;
   date: string;
-} 
+}
+
+export interface ExerciseTemplate {
+  name: string;
+  sets: number;
+  reps: number;
+  weight: number;
+}
+
+export interface WorkoutTemplate {
+  id: string;
+  name: string;
+  exercises: ExerciseTemplate[];
+}
+
+export interface ExerciseDefinition {
+  id: string;
+  name: string;
+  muscleGroup: string;
+  equipment: string;
+  gifUrl?: string;
+}
