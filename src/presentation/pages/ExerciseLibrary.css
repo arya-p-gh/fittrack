@@ -1,0 +1,72 @@
+.exercise-library-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.library-filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  background-color: var(--surface-light);
+  padding: 16px;
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.library-filters .form-group {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 200px;
+}
+
+.exercise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.exercise-card {
+  background-color: var(--surface);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.exercise-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.exercise-card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 1.2rem;
+}
+
+.exercise-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-muscle {
+  background-color: rgba(67, 97, 238, 0.15);
+  color: var(--primary-color);
+}
+
+.badge-equipment {
+  background-color: rgba(58, 12, 163, 0.15);
+  color: var(--secondary-color);
+}

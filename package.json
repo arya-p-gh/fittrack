@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "cd backend && node server.js",
+    "dev:all": "concurrently -n \"frontend,backend\" -c \"cyan,green\" \"vite\" \"node backend/server.js\"",
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",

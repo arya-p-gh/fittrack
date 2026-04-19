@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useWorkout } from '../../application/workout/WorkoutContext';
+import { useWorkoutTemplate } from '../../application/workoutTemplate/WorkoutTemplateContext';
+import { useExercise } from '../../application/exercise/ExerciseContext';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
-import { exerciseCategories } from '../../domain/reference/exercises';
 import { Exercise } from '../../domain/entities';
 import './WorkoutLog.css';
 
@@ -15,11 +16,17 @@ interface ExerciseFormData {
 
 const WorkoutLog = () => {
   const { workouts, addWorkout, getSortedWorkouts } = useWorkout();
+  const { templates, addTemplate } = useWorkoutTemplate();
+  const { exercises: exerciseDefs, loading } = useExercise();
+  
   const [exercises, setExercises] = useState<ExerciseFormData[]>([
     { name: '', sets: 3, reps: 10, weight: 0 },
   ]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState({ active: false, index: -1 });
+  const [templateName, setTemplateName] = useState('');
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+
   const sortedWorkouts = getSortedWorkouts();
 
   const handleAddExercise = () => {
@@ -42,17 +49,15 @@ const WorkoutLog = () => {
 
     if (field === 'name') {
       const inputValue = value.toString().toLowerCase();
-      if (inputValue.length > 0) {
-        const filteredSuggestions = exerciseCategories
-          .flatMap(category => category.exercises)
-          .filter(exercise => 
-            exercise.toLowerCase().includes(inputValue)
-          );
+      if (inputValue.length > 0 && !loading) {
+        const filteredSuggestions = exerciseDefs
+          .map(e => e.name)
+          .filter(name => name.toLowerCase().includes(inputValue));
         setSuggestions(filteredSuggestions);
-        setShowSuggestions(true);
+        setShowSuggestions({ active: true, index });
       } else {
         setSuggestions([]);
-        setShowSuggestions(false);
+        setShowSuggestions({ active: false, index: -1 });
       }
     }
   };
@@ -61,11 +66,29 @@ const WorkoutLog = () => {
     const newExercises = [...exercises];
     newExercises[index] = { ...newExercises[index], name: suggestion };
     setExercises(newExercises);
-    setShowSuggestions(false);
+    setShowSuggestions({ active: false, index: -1 });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSavingTemplate) {
+      if (!templateName.trim()) {
+        alert('Please enter a routine name.');
+        return;
+      }
+      try {
+        await addTemplate(templateName, exercises);
+        const savedName = templateName;
+        setIsSavingTemplate(false);
+        setTemplateName('');
+        alert(`Routine "${savedName}" saved to database successfully!`);
+      } catch {
+        alert('❌ Failed to save routine. Make sure the backend server is running.');
+      }
+      return;
+    }
+
     const workout = {
       id: uuidv4(),
       date: new Date().toISOString(),
@@ -75,15 +98,26 @@ const WorkoutLog = () => {
         date: new Date().toISOString(),
       })) as Exercise[],
     };
-    addWorkout(workout);
+    await addWorkout(workout);
     setExercises([{ name: '', sets: 3, reps: 10, weight: 0 }]);
+  };
+
+  const loadTemplate = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const templateId = e.target.value;
+    if (!templateId) return;
+
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setExercises(template.exercises.map(ex => ({ ...ex })));
+    }
+    e.target.value = '';
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       if (!target.closest('.exercise-suggestions')) {
-        setShowSuggestions(false);
+        setShowSuggestions({ active: false, index: -1 });
       }
     };
 
@@ -93,7 +127,17 @@ const WorkoutLog = () => {
 
   return (
     <div className="workout-log-page">
-      <h1 className="page-title">Workout Log</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 className="page-title">Workout Log</h1>
+        {templates.length > 0 && (
+          <select onChange={loadTemplate} className="form-input" style={{ width: '200px' }}>
+            <option value="">Load Routine...</option>
+            {templates.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        )}
+      </div>
 
       <div className="workout-form-container">
         <form onSubmit={handleSubmit} className="workout-form">
@@ -113,7 +157,7 @@ const WorkoutLog = () => {
                     className="form-input"
                     autoComplete="off"
                   />
-                  {showSuggestions && suggestions.length > 0 && (
+                  {showSuggestions.active && showSuggestions.index === index && suggestions.length > 0 && (
                     <div className="exercise-suggestions">
                       {suggestions.map((suggestion, i) => (
                         <div
@@ -181,7 +225,21 @@ const WorkoutLog = () => {
             </div>
           ))}
 
-          <div className="form-actions">
+          {isSavingTemplate && (
+            <div className="form-group" style={{ marginTop: '16px', maxWidth: '300px' }}>
+              <label htmlFor="template-name">Routine Name</label>
+              <input
+                id="template-name"
+                type="text"
+                className="form-input"
+                placeholder="e.g. Push Day"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+              />
+            </div>
+          )}
+
+          <div className="form-actions" style={{ marginTop: '20px' }}>
             <button
               type="button"
               className="button button-secondary"
@@ -189,9 +247,37 @@ const WorkoutLog = () => {
             >
               ➕ Add Exercise
             </button>
-            <button type="submit" className="button button-primary">
-              Log Workout
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {!isSavingTemplate ? (
+                <button 
+                  type="button" 
+                  className="button button-secondary"
+                  onClick={() => setIsSavingTemplate(true)}
+                >
+                  Save Routine
+                </button>
+              ) : (
+                <button 
+                  type="button" 
+                  className="button button-secondary"
+                  onClick={() => {
+                    setIsSavingTemplate(false);
+                    setTemplateName('');
+                  }}
+                >
+                  Cancel Saving
+                </button>
+              )}
+              <button 
+                type="submit" 
+                className="button button-primary"
+                onClick={() => {
+                  if(!isSavingTemplate) setIsSavingTemplate(false);
+                }}
+              >
+                {isSavingTemplate ? 'Save Routine' : 'Log Workout'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -233,4 +319,4 @@ const WorkoutLog = () => {
   );
 };
 
-export default WorkoutLog; 
+export default WorkoutLog;
