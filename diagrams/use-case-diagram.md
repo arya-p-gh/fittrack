@@ -3,34 +3,38 @@
 This diagram represents the strict user interactions bounded by the JWT Auth middleware present in `backend/server.js`.
 
 ```mermaid
-usecaseDiagram
-    actor "Unauthenticated User" as Guest
-    actor "Authenticated User" as User
+flowchart LR
+    %% Actors
+    Guest(["Guest (Unauthenticated)"])
+    User(["User (Authenticated)"])
 
-    rectangle "Auth Domain (server.js)" {
-        usecase "Register (/api/auth/register)" as UC1
-        usecase "Login (/api/auth/login)" as UC2
-        usecase "Token Verification (Middleware)" as UC3
-    }
+    subgraph Auth_Domain ["Auth Domain (server.js)"]
+        direction TB
+        UC1(["Register (/api/auth/register)"])
+        UC2(["Login (/api/auth/login)"])
+        UC3(["Token Verification (Middleware)"])
+    end
     
     Guest --> UC1
     Guest --> UC2
     
-    User --> UC3 : <<Requires JWT>>
+    User -->|Requires JWT| UC3
 
-    rectangle "Workout API (/api/workouts)" {
-        usecase "Sync Workout State (Brute-force)" as UC4
-        usecase "Fetch Entire Workout History" as UC5
-    }
+    subgraph Workout_API ["Workout API (/api/workouts)"]
+        direction TB
+        UC4(["Sync Workout State (Brute-force)"])
+        UC5(["Fetch Entire Workout History"])
+    end
 
-    rectangle "Chat Strategy Domain" {
-        usecase "Query AI" as UC6
-        usecase "Receive Safe Stub on API Failure" as UC7
-    }
+    subgraph Chat_Strategy_Domain ["Chat Strategy Domain"]
+        direction TB
+        UC6(["Query AI"])
+        UC7(["Receive Safe Stub on API Failure"])
+    end
 
-    UC3 ..> UC4 : <<permits>>
-    UC3 ..> UC5 : <<permits>>
+    UC3 -.->|permits| UC4
+    UC3 -.->|permits| UC5
     
     User --> UC6
-    UC6 ..> UC7 : <<extends if AI breaks>>
+    UC6 -.->|extends if AI breaks| UC7
 ```

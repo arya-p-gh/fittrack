@@ -7,15 +7,15 @@ classDiagram
     %% Core Entities (DTOs passed between layers)
     class Workout {
         +String id
-        +Date date
+        +String date
         +Exercise[] exercises
     }
 
     %% Interfaces (in src/application/interfaces/)
     class WorkoutRepository {
         <<interface>>
-        +saveAll(workouts: Workout[]) void
-        +getAll() Workout[]
+        +saveAll(workouts: Workout[]) Promise~void~
+        +getAll() Promise~Workout[]~
     }
 
     class ChatStrategy {
@@ -26,8 +26,8 @@ classDiagram
     %% Concrete Implementations (in src/infrastructure/)
     class ApiWorkoutRepository {
         <<Real Data Layer>>
-        +saveAll(workouts: Workout[]) void
-        +getAll() Workout[]
+        +saveAll(workouts: Workout[]) Promise~void~
+        +getAll() Promise~Workout[]~
     }
 
     class GeminiStrategy {
@@ -49,17 +49,26 @@ classDiagram
     %% Services (in src/application/workout/)
     class WorkoutService {
         <<Pure Logic>>
-        +calculateTotalMetrics(workouts: Workout[]) Metrics
-        +validateWorkout(w: Workout) boolean
+        +addWorkout(workouts: Workout[], workout: Workout) Workout[]
+        +addExercise(workouts: Workout[], workoutId: String, exercise: Exercise) Workout[]
+        +updateWorkout(workouts: Workout[], updatedWorkout: Workout) Workout[]
+        +deleteWorkout(workouts: Workout[], workoutId: String) Workout[]
+        +calculateMetrics(workouts: Workout[]) WorkoutMetrics
+        +sortByDate(workouts: Workout[]) Workout[]
+        +getRecentWorkouts(workouts: Workout[], limit: number) Workout[]
     }
 
     %% Presentation / State (in src/application/workout/)
     class WorkoutContext {
         <<DI Container / React Context>>
-        -Workout[] state
-        -WorkoutService service
-        -WorkoutRepository repository
-        +addWorkout(w: Workout) void
+        +Workout[] workouts
+        +addWorkout(workout: Workout) Promise~void~
+        +addExercise(workoutId: String, exercise: Exercise) Promise~void~
+        +updateWorkout(workout: Workout) Promise~void~
+        +deleteWorkout(workoutId: String) Promise~void~
+        +computeMetrics() WorkoutMetrics
+        +getRecentWorkouts(limit: number) Workout[]
+        +getSortedWorkouts() Workout[]
     }
 
     %% Relationships Mapping Back to Code
