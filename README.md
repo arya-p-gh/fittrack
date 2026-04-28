@@ -1,6 +1,7 @@
 # FitTrack: Comprehensive Health & Fitness Management System
 
-🚀 **Live Deployment**: [https://dainty-peony-592a40.netlify.app/](https://dainty-peony-592a40.netlify.app/)
+ **Live Deployment**: [https://dainty-peony-592a40.netlify.app/](https://dainty-peony-592a40.netlify.app/)
+ **Project Report**: [View Detailed Report](https://docs.google.com/document/d/1go2V0_gndLrSkOU4mv18BzscjhChF1ytpvLR4VNEBek/edit?usp=sharing)
 
 ## 1. Project Overview
 FitTrack is a full-stack health and fitness tracking platform. Going beyond rudimentary applications, this project was architected from the ground up to reflect industry standards in **System Design, Object-Oriented Programming (OOP) paradigms, and Database Engineering**. By enforcing a strict decoupled architecture (Domain-Driven Design), incorporating structural AI workflows, and integrating a full PostgreSQL backend, FitTrack stands as a comprehensive, scale-ready solution.
