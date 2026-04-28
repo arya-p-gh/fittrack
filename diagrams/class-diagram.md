@@ -150,6 +150,7 @@ classDiagram
 
   class apiFetch {
     <<function>>
+    +apiFetch(path: string, options?: RequestInit) Promise~Response~
   }
 
   ApiWorkoutRepository --> apiFetch
@@ -158,12 +159,55 @@ classDiagram
   ApiWorkoutTemplateRepository --> apiFetch
   ApiExerciseRepository --> apiFetch
 
-  class WorkoutContext
-  class NutritionContext
-  class PersonalBestContext
-  class WorkoutTemplateContext
-  class ExerciseContext
-  class AuthProvider
+  class WorkoutContext {
+    +Workout[] workouts
+    +addWorkout(workout: Workout) Promise~void~
+    +addExercise(workoutId: string, exercise: Exercise) Promise~void~
+    +updateWorkout(workout: Workout) Promise~void~
+    +deleteWorkout(workoutId: string) Promise~void~
+    +computeMetrics() WorkoutMetrics
+    +getRecentWorkouts(limit?: number) Workout[]
+    +getSortedWorkouts() Workout[]
+  }
+
+  class NutritionContext {
+    +NutritionLog[] nutritionLogs
+    +addNutritionLog(log: NutritionLog) Promise~void~
+    +updateNutritionLog(log: NutritionLog) Promise~void~
+    +deleteNutritionLog(logId: string) Promise~void~
+    +computeMetrics() NutritionMetrics
+    +getSortedNutritionLogs() NutritionLog[]
+  }
+
+  class PersonalBestContext {
+    +PersonalBest[] personalBests
+    +addPersonalBest(personalBest: PersonalBest) Promise~void~
+    +updatePersonalBest(personalBest: PersonalBest) Promise~void~
+    +deletePersonalBest(exerciseName: string) Promise~void~
+    +computeMetrics() PersonalBestMetrics
+    +getRankedPersonalBests() PersonalBest[]
+  }
+
+  class WorkoutTemplateContext {
+    +WorkoutTemplate[] templates
+    +addTemplate(name: string, exercises: ExerciseTemplate[]) Promise~void~
+    +updateTemplate(template: WorkoutTemplate) Promise~void~
+    +deleteTemplate(id: string) Promise~void~
+  }
+
+  class ExerciseContext {
+    +ExerciseDefinition[] exercises
+    +boolean loading
+  }
+
+  class AuthProvider {
+    +User|Null user
+    +string|Null token
+    +boolean isLoading
+    +login(email: string, password: string) Promise~void~
+    +register(email: string, password: string) Promise~void~
+    +logout() void
+  }
 
   WorkoutContext --> WorkoutService
   WorkoutContext --> WorkoutRepository
