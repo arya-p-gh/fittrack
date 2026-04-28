@@ -1,82 +1,128 @@
 # Class Level Architecture
 
-This Class Diagram is a direct representation of our real Domain-Driven codebase hierarchy within `/src`.
+This class diagram represents the current code structure inside `/src`, including async repository interfaces and the chat strategy module.
 
 ```mermaid
 classDiagram
-    %% Core Entities (DTOs passed between layers)
-    class Workout {
-        +String id
-        +String date
-        +Exercise[] exercises
-    }
+  direction LR
 
-    %% Interfaces (in src/application/interfaces/)
-    class WorkoutRepository {
-        <<interface>>
-        +saveAll(workouts: Workout[]) Promise~void~
-        +getAll() Promise~Workout[]~
-    }
+  class Workout
+  class Exercise
+  class NutritionLog
+  class PersonalBest
+  class WorkoutTemplate
+  class ExerciseDefinition
+  class User
 
-    class ChatStrategy {
-        <<interface>>
-        +sendMessage(msg: String) Promise~String~
-    }
+  class WorkoutRepository {
+    <<interface>>
+    +getAll() Promise~Workout[]~
+    +saveAll(workouts: Workout[]) Promise~void~
+  }
 
-    %% Concrete Implementations (in src/infrastructure/)
-    class ApiWorkoutRepository {
-        <<Real Data Layer>>
-        +saveAll(workouts: Workout[]) Promise~void~
-        +getAll() Promise~Workout[]~
-    }
+  class NutritionRepository {
+    <<interface>>
+    +getAll() Promise~NutritionLog[]~
+    +saveAll(logs: NutritionLog[]) Promise~void~
+  }
 
-    class GeminiStrategy {
-        <<AI Endpoint>>
-        +sendMessage(msg: String) Promise~String~
-    }
+  class PersonalBestRepository {
+    <<interface>>
+    +getAll() Promise~PersonalBest[]~
+    +saveAll(bests: PersonalBest[]) Promise~void~
+  }
 
-    class MockStrategy {
-        <<Stub>>
-        +sendMessage(msg: String) Promise~String~
-    }
+  class WorkoutTemplateRepository {
+    <<interface>>
+    +getAll() Promise~WorkoutTemplate[]~
+    +saveAll(templates: WorkoutTemplate[]) Promise~void~
+  }
 
-    class FallbackChatStrategy {
-        -ChatStrategy primary
-        -ChatStrategy fallback
-        +sendMessage(msg: String) Promise~String~
-    }
+  class ExerciseRepository {
+    <<interface>>
+    +getAll() Promise~ExerciseDefinition[]~
+  }
 
-    %% Services (in src/application/workout/)
-    class WorkoutService {
-        <<Pure Logic>>
-        +addWorkout(workouts: Workout[], workout: Workout) Workout[]
-        +addExercise(workouts: Workout[], workoutId: String, exercise: Exercise) Workout[]
-        +updateWorkout(workouts: Workout[], updatedWorkout: Workout) Workout[]
-        +deleteWorkout(workouts: Workout[], workoutId: String) Workout[]
-        +calculateMetrics(workouts: Workout[]) WorkoutMetrics
-        +sortByDate(workouts: Workout[]) Workout[]
-        +getRecentWorkouts(workouts: Workout[], limit: number) Workout[]
-    }
+  class ApiWorkoutRepository {
+    +getAll() Promise~Workout[]~
+    +saveAll(workouts: Workout[]) Promise~void~
+  }
+  class ApiNutritionRepository {
+    +getAll() Promise~NutritionLog[]~
+    +saveAll(logs: NutritionLog[]) Promise~void~
+  }
+  class ApiPersonalBestRepository {
+    +getAll() Promise~PersonalBest[]~
+    +saveAll(bests: PersonalBest[]) Promise~void~
+  }
+  class ApiWorkoutTemplateRepository {
+    +getAll() Promise~WorkoutTemplate[]~
+    +saveAll(templates: WorkoutTemplate[]) Promise~void~
+  }
+  class ApiExerciseRepository {
+    +getAll() Promise~ExerciseDefinition[]~
+  }
 
-    %% Presentation / State (in src/application/workout/)
-    class WorkoutContext {
-        <<DI Container / React Context>>
-        +Workout[] workouts
-        +addWorkout(workout: Workout) Promise~void~
-        +addExercise(workoutId: String, exercise: Exercise) Promise~void~
-        +updateWorkout(workout: Workout) Promise~void~
-        +deleteWorkout(workoutId: String) Promise~void~
-        +computeMetrics() WorkoutMetrics
-        +getRecentWorkouts(limit: number) Workout[]
-        +getSortedWorkouts() Workout[]
-    }
+  ApiWorkoutRepository ..|> WorkoutRepository
+  ApiNutritionRepository ..|> NutritionRepository
+  ApiPersonalBestRepository ..|> PersonalBestRepository
+  ApiWorkoutTemplateRepository ..|> WorkoutTemplateRepository
+  ApiExerciseRepository ..|> ExerciseRepository
 
-    %% Relationships Mapping Back to Code
-    ApiWorkoutRepository ..|> WorkoutRepository : implements interface
-    GeminiStrategy ..|> ChatStrategy : implements interface
-    MockStrategy ..|> ChatStrategy : implements interface
-    FallbackChatStrategy ..|> ChatStrategy : wraps primary & fallback
+  class WorkoutService {
+    +addWorkout(workouts, workout) Workout[]
+    +addExercise(workouts, workoutId, exercise) Workout[]
+    +updateWorkout(workouts, updatedWorkout) Workout[]
+    +deleteWorkout(workouts, workoutId) Workout[]
+    +calculateMetrics(workouts) WorkoutMetrics
+    +sortByDate(workouts) Workout[]
+    +getRecentWorkouts(workouts, limit) Workout[]
+  }
 
-    WorkoutContext --> WorkoutService : executes logic
-    WorkoutContext --> WorkoutRepository : loosely coupled dependencies
+  class ChatStrategy {
+    <<interface>>
+    +sendMessage(input: string) Promise~string~
+  }
+  class GeminiStrategy {
+    +sendMessage(input: string) Promise~string~
+  }
+  class MockStrategy {
+    +sendMessage(input: string) Promise~string~
+  }
+  class FallbackChatStrategy {
+    -primary: ChatStrategy
+    -fallback: ChatStrategy
+    +sendMessage(input: string) Promise~string~
+  }
+
+  GeminiStrategy ..|> ChatStrategy
+  MockStrategy ..|> ChatStrategy
+  FallbackChatStrategy ..|> ChatStrategy
+
+  class apiFetch {
+    <<function>>
+  }
+
+  ApiWorkoutRepository --> apiFetch
+  ApiNutritionRepository --> apiFetch
+  ApiPersonalBestRepository --> apiFetch
+  ApiWorkoutTemplateRepository --> apiFetch
+  ApiExerciseRepository --> apiFetch
+
+  class WorkoutContext
+  class NutritionContext
+  class PersonalBestContext
+  class WorkoutTemplateContext
+  class ExerciseContext
+  class AuthProvider
+
+  WorkoutContext --> WorkoutService
+  WorkoutContext --> WorkoutRepository
+
+  NutritionContext --> NutritionRepository
+  PersonalBestContext --> PersonalBestRepository
+  WorkoutTemplateContext --> WorkoutTemplateRepository
+  ExerciseContext --> ExerciseRepository
+
+  AuthProvider --> User
 ```

@@ -1,34 +1,33 @@
 # Execution Sequence (AI Fallback Path)
 
-This diagram tracks the literal execution flow of the AI module built in `src/application/chat`, demonstrating how `FallbackChatStrategy.ts` prevents system crashes when `GeminiStrategy.ts` fails.
+This diagram tracks the execution flow of the AI module in `src/application/chat`. It reflects the current codebase, where the frontend calls `/api/chat` but `backend/server.js` does not implement that route—so the primary strategy fails and fallback returns a mock reply.
 
 ```mermaid
 sequenceDiagram
-    actor User
-    participant UI as ChatWindow
-    participant Factory as createChatStrategy
-    participant Fallback as FallbackChatStrategy
-    participant Primary as GeminiStrategy
-    participant API as LLM Network Endpoint
-    participant Mock as MockStrategy
+  actor User
+  participant UI as ChatWindow.tsx
+  participant Factory as createChatStrategy.ts
+  participant Fallback as FallbackChatStrategy
+  participant Primary as GeminiStrategy
+  participant Backend as Express API
+  participant Mock as MockStrategy
 
-    Note over User, Factory: Environment Initialization
-    Factory-->>Fallback: returns instance wrapped around Gemini & Mock
-    
-    User->>UI: Types "Hello" (clicks send)
-    UI->>Fallback: .sendMessage("Hello")
-    
-    Fallback->>Primary: .sendMessage("Hello")
-    Primary->>API: HTTP POST /api/chat
-    
-    Note over API: External Vendor Outage
-    API-->>Primary: 503 Service Unavailable / Timeout
-    
-    Primary--xFallback: throws Error("API Unreachable")
-    Note over Fallback: Catches error (swallows crash)
-    
-    Fallback->>Mock: .sendMessage("Hello")
-    Mock-->>Fallback: returns "(Mock) Service degraded. Stubbed reply."
-    Fallback-->>UI: returns "(Mock) Service degraded..."
-    UI-->>User: Renders text gracefully
+  Note over UI,Factory: App startup (module init)
+  UI->>Factory: createChatStrategy()
+  Factory-->>UI: returns Fallback(Gemini("/api/chat"), Mock)
+
+  User->>UI: Types message + Send
+  UI->>Fallback: sendMessage(userMessage)
+
+  Fallback->>Primary: sendMessage(userMessage)
+  Primary->>Backend: POST /api/chat (expects {reply})
+
+  Note over Backend: Route /api/chat is NOT implemented in backend/server.js
+  Backend-->>Primary: 404 Not Found (or network error)
+
+  Primary--xFallback: throws Error
+  Fallback->>Mock: sendMessage(userMessage)
+  Mock-->>Fallback: returns stub reply
+  Fallback-->>UI: stub reply
+  UI-->>User: Renders assistant message
 ```

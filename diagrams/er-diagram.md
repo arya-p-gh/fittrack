@@ -4,75 +4,77 @@ This ER diagram directly represents the structure instantiated inside our actual
 
 ```mermaid
 erDiagram
-    users ||--o{ workouts : "logs"
-    users ||--o{ nutrition_logs : "records"
-    users ||--o{ personal_bests : "achieves"
-    
-    workouts ||--o{ exercises : "contains"
-    workout_templates ||--o{ template_exercises : "templates"
-    users ||--o{ workout_templates : "owns"
+  users ||--o{ workouts : "has"
+  workouts ||--o{ exercises : "contains"
 
-    users {
-        string id PK
-        string email
-        string password_hash
-        timestamp created_at
-    }
+  users ||--o{ nutrition_logs : "has"
+  users ||--o{ personal_bests : "has"
 
-    workouts {
-        string id PK
-        string user_id FK
-        timestamp date
-    }
+  users ||--o{ workout_templates : "owns"
+  workout_templates ||--o{ template_exercises : "contains"
 
-    exercises {
-        string id PK
-        string workout_id FK
-        string name
-        int sets
-        int reps
-        numeric weight
-        timestamp date
-    }
+  users {
+    varchar id PK
+    varchar email "UNIQUE NOT NULL"
+    varchar password_hash "NOT NULL"
+    timestamp created_at
+  }
 
-    nutrition_logs {
-        string id PK
-        string user_id FK
-        timestamp date
-        int calories
-        int protein
-        int carbs
-        int fats
-    }
+  workouts {
+    varchar id PK
+    varchar user_id FK
+    timestamp date
+  }
 
-    personal_bests {
-        string id PK
-        string user_id FK
-        string exercise_name
-        numeric weight
-        timestamp date
-    }
+  exercises {
+    varchar id PK
+    varchar workout_id FK
+    varchar name
+    int sets
+    int reps
+    numeric weight
+    timestamp date
+  }
 
-    exercise_definitions {
-        string id PK
-        string name
-        string muscle_group
-        string equipment
-        string gif_url
-    }
+  nutrition_logs {
+    varchar id PK
+    varchar user_id FK
+    timestamp date
+    int calories
+    int protein
+    int carbs
+    int fats
+  }
 
-    template_exercises {
-        string id PK
-        string template_id FK
-        string name
-        int sets
-        int reps
-        numeric weight
-    }
+  personal_bests {
+    varchar id PK
+    varchar user_id FK
+    varchar exercise_name
+    numeric weight
+    timestamp date
+    %% UNIQUE(user_id, exercise_name)
+  }
 
-    workout_templates {
-        string id PK
-        string user_id FK
-        string name
-    }
+  workout_templates {
+    varchar id PK
+    varchar user_id FK
+    varchar name
+  }
+
+  template_exercises {
+    varchar id PK
+    varchar template_id FK
+    varchar name
+    int sets
+    int reps
+    numeric weight
+  }
+
+  exercise_definitions {
+    varchar id PK
+    varchar name
+    varchar muscle_group
+    varchar equipment
+    varchar gif_url
+  }
 ```
