@@ -3,68 +3,73 @@
 This diagram represents the user interactions implemented by the current Express backend in `backend/server.js` (JWT-protected routes + public auth routes).
 
 ```mermaid
-usecaseDiagram
-  actor "Guest" as Guest
-  actor "Authenticated User" as User
+flowchart LR
+  %% Actors
+  Guest(["Guest (Unauthenticated)"])
+  User(["User (Authenticated)"])
 
-  rectangle "Auth API (Express)" {
-    usecase "Register\nPOST /api/auth/register" as UC_Register
-    usecase "Login\nPOST /api/auth/login" as UC_Login
-    usecase "JWT Verification\n(authMiddleware)" as UC_JWT
-  }
+  subgraph Auth["Auth API (Express)"]
+    direction TB
+    UC_Register(["Register<br/>POST /api/auth/register"])
+    UC_Login(["Login<br/>POST /api/auth/login"])
+    UC_JWT(["JWT Verification<br/>(authMiddleware)"])
+  end
 
   Guest --> UC_Register
   Guest --> UC_Login
-  User --> UC_JWT : <<requires Bearer token>>
+  User -->|requires Bearer token| UC_JWT
 
-  rectangle "Workout Tracking (protected)" {
-    usecase "Fetch Workouts\nGET /api/workouts" as UC_GetWorkouts
-    usecase "Sync Workouts (delete+insert)\nPOST /api/workouts" as UC_SyncWorkouts
-  }
+  subgraph Workouts["Workout Tracking (protected)"]
+    direction TB
+    UC_GetWorkouts(["Fetch Workouts<br/>GET /api/workouts"])
+    UC_SyncWorkouts(["Sync Workouts (delete+insert)<br/>POST /api/workouts"])
+  end
 
-  rectangle "Nutrition (protected)" {
-    usecase "Fetch Nutrition Logs\nGET /api/nutrition" as UC_GetNutrition
-    usecase "Sync Nutrition Logs (delete+insert)\nPOST /api/nutrition" as UC_SyncNutrition
-  }
+  subgraph Nutrition["Nutrition (protected)"]
+    direction TB
+    UC_GetNutrition(["Fetch Nutrition Logs<br/>GET /api/nutrition"])
+    UC_SyncNutrition(["Sync Nutrition Logs (delete+insert)<br/>POST /api/nutrition"])
+  end
 
-  rectangle "Personal Bests (protected)" {
-    usecase "Fetch Personal Bests\nGET /api/personal-bests" as UC_GetPB
-    usecase "Sync Personal Bests (delete+insert)\nPOST /api/personal-bests" as UC_SyncPB
-  }
+  subgraph PB["Personal Bests (protected)"]
+    direction TB
+    UC_GetPB(["Fetch Personal Bests<br/>GET /api/personal-bests"])
+    UC_SyncPB(["Sync Personal Bests (delete+insert)<br/>POST /api/personal-bests"])
+  end
 
-  rectangle "Workout Templates (protected)" {
-    usecase "Fetch Templates\nGET /api/workout_templates" as UC_GetTemplates
-    usecase "Sync Templates (delete+insert)\nPOST /api/workout_templates" as UC_SyncTemplates
-  }
+  subgraph Templates["Workout Templates (protected)"]
+    direction TB
+    UC_GetTemplates(["Fetch Templates<br/>GET /api/workout_templates"])
+    UC_SyncTemplates(["Sync Templates (delete+insert)<br/>POST /api/workout_templates"])
+  end
 
-  rectangle "Exercise Library (protected)" {
-    usecase "Browse Exercise Definitions\nGET /api/exercises" as UC_GetExerciseDefs
-  }
+  subgraph Exercises["Exercise Library (protected)"]
+    direction TB
+    UC_GetExerciseDefs(["Browse Exercise Definitions<br/>GET /api/exercises"])
+  end
 
-  UC_JWT ..> UC_GetWorkouts : <<permits>>
-  UC_JWT ..> UC_SyncWorkouts : <<permits>>
-  UC_JWT ..> UC_GetNutrition : <<permits>>
-  UC_JWT ..> UC_SyncNutrition : <<permits>>
-  UC_JWT ..> UC_GetPB : <<permits>>
-  UC_JWT ..> UC_SyncPB : <<permits>>
-  UC_JWT ..> UC_GetTemplates : <<permits>>
-  UC_JWT ..> UC_SyncTemplates : <<permits>>
-  UC_JWT ..> UC_GetExerciseDefs : <<permits>>
+  UC_JWT -.permits.-> UC_GetWorkouts
+  UC_JWT -.permits.-> UC_SyncWorkouts
+  UC_JWT -.permits.-> UC_GetNutrition
+  UC_JWT -.permits.-> UC_SyncNutrition
+  UC_JWT -.permits.-> UC_GetPB
+  UC_JWT -.permits.-> UC_SyncPB
+  UC_JWT -.permits.-> UC_GetTemplates
+  UC_JWT -.permits.-> UC_SyncTemplates
+  UC_JWT -.permits.-> UC_GetExerciseDefs
 
   User --> UC_GetWorkouts
-  User --> UC_SyncWorkouts
   User --> UC_GetNutrition
-  User --> UC_SyncNutrition
   User --> UC_GetPB
-  User --> UC_SyncPB
   User --> UC_GetTemplates
-  User --> UC_SyncTemplates
   User --> UC_GetExerciseDefs
 
-  rectangle "Chat (frontend strategy; /api/chat missing server-side)" {
-    usecase "Ask Chat Assistant\n(ChatStrategy.sendMessage)" as UC_Chat
-    usecase "Fallback to Mock reply\n(on primary failure)" as UC_ChatFallback
-  }
+  subgraph Chat["Chat (frontend strategy; /api/chat missing server-side)"]
+    direction TB
+    UC_Chat(["Ask Chat Assistant<br/>(ChatStrategy.sendMessage)"])
+    UC_ChatFallback(["Fallback to Mock reply<br/>(on primary failure)"])
+    UC_Chat -.extends on error.-> UC_ChatFallback
+  end
+
   User --> UC_Chat
-  UC_Chat ..> UC_ChatFallback : <<extends on error>>
 ```

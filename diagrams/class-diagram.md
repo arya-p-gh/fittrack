@@ -6,13 +6,62 @@ This class diagram represents the current code structure inside `/src`, includin
 classDiagram
   direction LR
 
-  class Workout
-  class Exercise
-  class NutritionLog
-  class PersonalBest
-  class WorkoutTemplate
-  class ExerciseDefinition
-  class User
+  %% Domain entity shapes are based on src/domain/entities/index.ts
+  class User {
+    +string id
+    +string email
+  }
+
+  class Exercise {
+    +string id
+    +string name
+    +number sets
+    +number reps
+    +number weight
+    +string date
+  }
+
+  class Workout {
+    +string id
+    +string date
+    +Exercise[] exercises
+  }
+
+  class NutritionLog {
+    +string id
+    +string date
+    +number calories
+    +number protein
+    +number carbs
+    +number fats
+  }
+
+  class PersonalBest {
+    +string exerciseName
+    +number weight
+    +string date
+  }
+
+  class ExerciseTemplate {
+    +string name
+    +number sets
+    +number reps
+    +number weight
+  }
+
+  class WorkoutTemplate {
+    +string id
+    +string name
+    +ExerciseTemplate[] exercises
+  }
+
+  class ExerciseDefinition {
+    +string id
+    +string name
+    +string muscleGroup
+    +string equipment
+    +string gifUrl?
+  }
 
   class WorkoutRepository {
     <<interface>>
